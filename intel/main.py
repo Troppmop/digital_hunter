@@ -10,7 +10,7 @@ from models import Intel
 
 class MongoIn:
     def __init__(self):
-        self.client = MongoClient('mongodb://localhost:270127')['test']['targets']
+        self.client = MongoClient('mongodb://localhost:27017')['test']['targets']
     def add(self, target):
         self.client.insert_one(target)
     

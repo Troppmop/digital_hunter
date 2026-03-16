@@ -9,7 +9,7 @@ from models import AttackAlert
 
 class MongoIn:
     def __init__(self):
-        self.client = MongoClient('mongodb://localhost:27017')['test']['targets']
+        self.client = MongoClient('mongodb://mongo:27017')['test']['targets']
     def add(self, target):
         self.client.insert_one(target)
     
@@ -20,7 +20,7 @@ class KafkaOut:
     def __init__(self, db:MongoIn):
         
         self.consumer = Consumer({
-            "bootstrap.servers": "localhost:9092",
+            "bootstrap.servers": "kafka:9092",
             "group.id": "order-tracker",
             "auto.offset.reset": "earliest"
         })

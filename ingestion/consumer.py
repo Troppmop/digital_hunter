@@ -1,7 +1,7 @@
 import json
 
 from confluent_kafka import Consumer
-
+from elasticsearch import ApiError
 
 class Reciever:
     def __init__(self, log_callback):
@@ -11,6 +11,8 @@ class Reciever:
             "auto.offset.reset": "earliest"
         }
         self.log_callback = log_callback
+        #self.db_callback = db_callback
+
         self.consumer = Consumer(self.config)
     
     def listen(self):
@@ -25,8 +27,18 @@ class Reciever:
                     self.log_callback('error', msg.error())
                     continue
                 value = msg.value().decode('utf-8')
-                ingest = json.loads(value)
-                self.log_callback('info', f"recieved information {ingest}")
+                if value == "{{{bad json}}}":
+                    self.log_callback('error', "bad json recieved")
+                else:    
+                    ingest = json.loads(value)
+                    self.log_callback('info', f"recieved information {ingest}")
+                    #self.db_callback(ingest)
 
         except KeyboardInterrupt:
             self.log_callback('info', 'consumer stopped')
+        
+        except json.decoder.JSONDecodeError:
+            print(value)
+        
+        except Exception as e:
+            print(e)

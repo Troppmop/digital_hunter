@@ -9,3 +9,6 @@ now i have to make the consumer to start recieving these messages
 i see some warnings that there is broken bson? maybe something to use pandas to clean up,
 but ill wait and see how to the workflow goes
 
+10:48
+i implemented the consumer and included the logging function which defaults to print, 
+as i have not set up elasticsearch. i will do this now

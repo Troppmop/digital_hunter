@@ -3,8 +3,11 @@ import json
 from confluent_kafka import Consumer
 from elasticsearch import ApiError
 
+from producer import Sender
+from models import IntelSignal, AirAttack, DamageAlert
+
 class Reciever:
-    def __init__(self, log_callback):
+    def __init__(self, log_callback, producer: Sender):
         self.config = {
             "bootstrap.servers": "localhost:9092",
             "group.id": "ingestion",
@@ -12,7 +15,7 @@ class Reciever:
         }
         self.log_callback = log_callback
         #self.db_callback = db_callback
-
+        self.producer = producer
         self.consumer = Consumer(self.config)
     
     def listen(self):
@@ -26,19 +29,23 @@ class Reciever:
                 if msg.error():
                     self.log_callback('error', msg.error())
                     continue
+
+                
                 value = msg.value().decode('utf-8')
-                if value == "{{{bad json}}}":
-                    self.log_callback('error', "bad json recieved")
-                else:    
-                    ingest = json.loads(value)
-                    self.log_callback('info', f"recieved information {ingest}")
-                    #self.db_callback(ingest)
+                
+                   
+                ingest = json.loads(value)
+
+                self.log_callback('info', f"recieved information {ingest}")
+                
+                #self.db_callback(ingest)
 
         except KeyboardInterrupt:
             self.log_callback('info', 'consumer stopped')
         
-        except json.decoder.JSONDecodeError:
-            print(value)
-        
         except Exception as e:
-            print(e)
+            self.producer.send(value, e)
+            self.log_callback('error', f'sent {value} back to dlq topic')
+            self.listen()
+        
+        

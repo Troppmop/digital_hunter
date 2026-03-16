@@ -5,14 +5,8 @@ from pymongo import MongoClient
 import haversine
 from logger import log_event
 
-class Intel(BaseModel):
-    timestamp: str
-    signal_id: str
-    entity_id: str
-    reported_lat: float
-    reported_lon: float
-    signal_type: str
-    priority_level: int
+from models import Intel
+
 
 class MongoIn:
     def __init__(self):
@@ -97,3 +91,8 @@ class KafkaOut:
         finally:
             self.consumer.close()
 
+db = MongoIn()
+kafkain = KafkaIn()
+kafkaout = KafkaOut(kafkain,db)
+
+kafkaout.listen()

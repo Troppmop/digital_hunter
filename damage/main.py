@@ -4,11 +4,7 @@ from confluent_kafka import Consumer
 from pymongo import MongoClient
 from logger import log_event
 
-class DamageAlert(BaseModel):
-    timestamp: str
-    attack_id: str
-    entity_id: str
-    result: str
+from models import DamageAlert
 
 class MongoIn:
     def __init__(self):
@@ -62,3 +58,9 @@ class KafkaOut:
 
         finally:
             self.consumer.close()
+
+db = MongoIn()
+
+kafkaout = KafkaOut(db)
+
+kafkaout.listen()

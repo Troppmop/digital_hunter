@@ -20,7 +20,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
 
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
-
+    restart: always
     volumes:
       - kafka_kraft3:/var/lib/kafka/data
 
@@ -43,6 +43,7 @@ services:
       - esdata3:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+    restart: always
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -50,19 +51,23 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    restart: always
 
   intel:
     build: ./intel
     container_name: intel
+    restart: always
 
   attack: 
     build: ./attack
     container_name: attack
+    restart: always
 
   damage:
     build: ./damage
     container_name: damage
-    
+    restart: always
+
 volumes:
   kafka_kraft3:
   esdata3:

@@ -1,3 +1,4 @@
 pydantic
 confluent-kafka
 pymongo
+elasticsearch

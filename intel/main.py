@@ -3,6 +3,8 @@ from pydantic import BaseModel, ValidationError
 from confluent_kafka import Consumer, Producer
 from pymongo import MongoClient
 import haversine
+from logger import log_event
+
 class Intel(BaseModel):
     timestamp: str
     signal_id: str
@@ -52,14 +54,14 @@ class KafkaOut:
                 if msg is None:
                     continue
                 if msg.error():
-                    print("❌ Error:", msg.error())
+                    log_event("error",f"❌ Error:, {msg.error()}")
                     continue
 
                 value = msg.value().decode("utf-8")
                 try:
                     order = json.loads(value)
                 except json.JSONDecodeError:
-                    print("invalid json")
+                    log_event("error","invalid json")
                 
                     self.producer.send(value, "invalid json")
                 try:
@@ -67,7 +69,7 @@ class KafkaOut:
 
                     
                 except ValidationError:
-                    print("invalid model")
+                    log_event("error","invalid model")
                     self.producer.send(order, "invalid model")
                 
 
@@ -83,14 +85,14 @@ class KafkaOut:
                     old_lat = old_log['lat']
                     old_lon = old_log['lon']
                 calculation = haversine.haversine_km(old_lat, old_lon, model['lat'], model['lon'])
-                print(calculation)
+                log_event("info",calculation)
                 try:
                     self.db.add(model)
                 except:
-                    print("failed to add to db")
+                    log_event("error","failed to add to db")
 
         except KeyboardInterrupt:
-            print("\n🔴 Stopping consumer")
+            log_event("info","\n🔴 Stopping consumer")
 
         finally:
             self.consumer.close()

@@ -2,6 +2,7 @@ from pydantic import BaseModel, ValidationError
 import json
 from confluent_kafka import Consumer
 from pymongo import MongoClient
+from logger import log_event
 
 class DamageAlert(BaseModel):
     timestamp: str
@@ -37,27 +38,27 @@ class KafkaOut:
                 if msg is None:
                     continue
                 if msg.error():
-                    print("❌ Error:", msg.error())
+                    log_event("error",f"❌ Error: {msg.error()}")
                     continue
 
                 value = msg.value().decode("utf-8")
                 try:
                     order = json.loads(value)
                 except json.JSONDecodeError:
-                    print("invalid json")
+                    log_event("error","invalid json")
                 
                     
                 try:
                     model = DamageAlert.model_validate(order).model_dump()
                 
                 except ValidationError:
-                    print("data is invalid")
+                    log_event("error","data is invalid")
 
-                print(model)
+                log_event("info",model)
                 self.db.add(model)
 
         except KeyboardInterrupt:
-            print("\n🔴 Stopping consumer")
+            log_event("info","\n🔴 Stopping consumer")
 
         finally:
             self.consumer.close()

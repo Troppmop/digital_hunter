@@ -22,7 +22,7 @@ services:
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
 
     volumes:
-      - kafka_kraft:/var/lib/kafka/data
+      - kafka_kraft3:/var/lib/kafka/data
 
   elasticsearch:
     container_name : elasticsearch
@@ -40,11 +40,31 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - esdata2:/usr/share/elasticsearch/data
+      - esdata3:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
- 
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  intel:
+    build: ./intel
+    container_name: intel
+
+  attack: 
+    build: ./attack
+    container_name: attack
+
+  damage:
+    build: ./damage
+    container_name: damage
+    
 volumes:
-  kafka_kraft:
-  esdata2:
+  kafka_kraft3:
+  esdata3:
+  mongo_data:
   
